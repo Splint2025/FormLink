@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Item Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="profile-wrapper">
+       <div id="profile-pic-container">
+	     <div id="profile-glow-trail"></div>
+		 <img id="profile-pic" src="" alt="Profile Picture" />
+         <img id="profile-pic" src="" alt="Profile Picture" style="display:none;" />
+         <input type="file" id="profile-upload" accept="image/*,image/gif" style="display:none;" />
+       </div>
+       <ul id="profile-menu">
+         <li onclick="triggerProfileUpload()">Edit</li>
+         <li onclick="deleteProfilePicture()">Delete</li>
+       </ul>
+    </div>
+
+    <div class="container">
+        <h1>Grocery Item Manager</h1>
+        
+        <div class="input-group">
+            <input type="text" id="newItemInput" placeholder="Enter new main item...">
+            <input type="file" id="newItemImageInput" accept="image/*" style="max-width:180px;">
+            <button id="addItemBtn" type="button">Add Main Item</button>
+        </div>
+        
+        <div class="input-group">
+            <select id="parentItemSelect">
+                <option value="">Select parent item...</option>
+            </select>
+            <input type="text" id="newSubitemInput" placeholder="Enter new subitem...">
+            <input type="file" id="newSubitemImageInput" accept="image/*" style="max-width:180px;">
+            <button id="addSubitemBtn" class="secondary" type="button">Add Subitem</button>
+        </div>
+        
+        <ul id="itemList">
+            <!-- Items will be added here -->
+        </ul>
+        
+        <div id="emptyState" class="empty-state">
+            No items added yet. Start by adding an item above.
+        </div>
+        
+        <div id="contextMenu" class="context-menu">
+            <button id="addSubitemCtxBtn">Add Subitem</button>
+            <button id="editBtn">Edit</button>
+            <button id="deleteBtn" class="delete">Delete</button>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modalTitle">Edit Item</h3>
+            <input type="text" id="editInput">
+            <div class="modal-actions">
+                <button id="cancelEditBtn">Cancel</button>
+                <button id="saveEditBtn" class="secondary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Confirm Delete</h3>
+            <div class="delete-confirm" id="deleteConfirmText">
+                Are you sure you want to delete this item?
+            </div>
+            <div class="modal-actions">
+                <button id="cancelDeleteBtn">Cancel</button>
+                <button id="confirmDeleteBtn" class="danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Form Button and Formspree URL Input -->
+    <div style="text-align:center; margin-top: 30px;">
+        <input id="formspreeUrlInput" type="text" placeholder="Paste your Formspree URL here" style="width:320px;max-width:90vw;padding:10px;font-size:16px;border-radius:4px;border:1px solid #ccc;margin-bottom:10px;">
+        <button id="createFormBtn" style="background:#3498db; color:white; font-size:18px; padding:12px 24px; border-radius:6px; border:none; cursor:pointer;">Create Form</button>
+    </div>
+
+    <!-- Mobile Image Zoom Modal -->
+    <div id="imgZoomModal" class="img-zoom-modal">
+        <button class="close-btn" id="imgZoomCloseBtn" aria-label="Close">&times;</button>
+        <img id="imgZoomModalImg" src="" alt="Zoomed image">
+    </div>
+
+    <!-- Item Manager Section (added, does not affect existing UI) -->
+    <div class="main-container" id="itemManagerSection" style="margin-top:40px;">
+      <div class="section-title">Item Manager (Set Prices)</div>
+      <div id="itemManagerContainer"></div>
+    </div>
+
+    <!-- Add/Edit Units Button (above Item Manager) -->
+    <div style="text-align:center; margin-top:18px;">
+      <button id="addEditUnitsBtn" style="background:#1976d2;color:#fff;font-size:16px;padding:10px 28px;border-radius:6px;border:none;cursor:pointer;">+ Add/Edit Units</button>
+    </div>
+
+    <!-- Unit Manager Modal (for managing units) -->
+    <div id="unitManagerModal" class="modal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:50vw;height:100vh;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);">
+      <div id="unitManagerContent" class="modal-content" style="background:#fff;padding:32px 24px 18px 24px;border-radius:10px;min-width:320px;max-width:90vw;position:relative;box-shadow:0 2px 16px rgba(0,0,0,0.12);">
+        <button id="closeUnitManagerBtn" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:26px;line-height:1;color:#888;cursor:pointer;">&times;</button>
+        <!-- Modal content will be rendered here by JS -->
+      </div>
+    </div>
+
+    <!-- Customer Orders Modal -->
+    <div id="customerOrdersModal" class="modal" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100vw;height:100vh;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);">
+      <div class="modal-content" style="background:#fff;padding:32px 24px 18px 24px;border-radius:10px;min-width:340px;max-width:98vw;max-height:92vh;overflow-y:auto;position:relative;box-shadow:0 2px 16px rgba(0,0,0,0.12);">
+        <button id="closeCustomerOrdersBtn" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:26px;line-height:1;color:#888;cursor:pointer;">&times;</button>
+        <div class="modal-title" style="font-size:1.3em;font-weight:600;margin-bottom:18px;">All Customer Orders</div>
+        <div id="customerOrdersContent"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+// --- Unit Manager Modal Logic for Item Manager ---
+(function(){
+  if (!document.getElementById('unitManagerModal')) return;
+  window.showUnitManager = function(onClose) {
+    var modal = document.getElementById('unitManagerModal');
+    var content = document.getElementById('unitManagerContent');
+    function getUnits() {
+      try {
+        return JSON.parse(localStorage.getItem('units_v1')||'null') || ['Kg','g','L','ml','pkt','piece'];
+      } catch(e) { return ['Kg','g','L','ml','pkt','piece']; }
+    }
+    function setUnits(units) {
+      localStorage.setItem('units_v1', JSON.stringify(units));
+    }
+    function renderUnitManager() {
+      var units = getUnits();
+      var html = "<div class='modal-title'>Manage Units</div>";
+      html += "<ul style='padding-left:0;list-style:none;'>";
+      units.forEach(function(unit, idx) {
+        html += "<li style='display:flex;align-items:center;gap:8px;margin-bottom:8px;'><input type='text' value='"+unit+"' data-idx='"+idx+"' style='flex:1;padding:6px 8px;border-radius:4px;border:1px solid #ccc;'>";
+        if (units.length > 1) html += "<button data-del='"+idx+"' style='background:#e74c3c;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;'>Delete</button>";
+        html += "</li>";
+      });
+      html += "</ul>";
+      html += "<button id='addUnitBtn' style='background:#1976d2;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-weight:600;cursor:pointer;margin-top:8px;'>+ Add Unit</button>";
+      html += "<div class='modal-actions' style='margin-top:18px;'><button id='saveUnitsBtn'>Save</button><button type='button' class='cancel' id='cancelUnitsBtn'>Cancel</button></div>";
+      content.innerHTML = html;
+      // Delete logic
+      Array.from(content.querySelectorAll('[data-del]')).forEach(function(btn){
+        btn.onclick = function() {
+          var idx = parseInt(btn.getAttribute('data-del'));
+          var units = getUnits();
+          units.splice(idx,1);
+          setUnits(units);
+          renderUnitManager();
+        };
+      });
+      // Add logic
+      content.querySelector('#addUnitBtn').onclick = function() {
+        var units = getUnits();
+        units.push('');
+        setUnits(units);
+        renderUnitManager();
+      };
+      // Save logic
+      content.querySelector('#saveUnitsBtn').onclick = function() {
+        var inputs = content.querySelectorAll('input[type=text]');
+        var newUnits = [];
+        for (var i=0; i<inputs.length; ++i) {
+          var val = inputs[i].value.trim();
+          if (val && newUnits.indexOf(val)===-1) newUnits.push(val);
+        }
+        if (newUnits.length === 0) newUnits = ['Kg','g','L','ml','pkt','piece'];
+        setUnits(newUnits);
+        closeUnitManager();
+      };
+      // Cancel logic
+      content.querySelector('#cancelUnitsBtn').onclick = closeUnitManager;
+    }
+    function closeUnitManager() {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      if (onClose) onClose();
+    }
+    document.getElementById('closeUnitManagerBtn').onclick = closeUnitManager;
+    modal.onclick = function(e) { if (e.target === modal) closeUnitManager(); };
+    renderUnitManager();
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+  // Attach to button
+  var btn = document.getElementById('addEditUnitsBtn');
+  if (btn) {
+    btn.onclick = function() {
+      window.showUnitManager(function() {
+        // After closing modal, refresh all unit dropdowns
+        var units = (function(){ try { return JSON.parse(localStorage.getItem('units_v1')||'null') || ['Kg','g','L','ml','pkt','piece']; } catch(e){ return ['Kg','g','L','ml','pkt','piece']; } })();
+        document.querySelectorAll('.unit-select').forEach(function(sel) {
+          var prev = sel.value;
+          sel.innerHTML = '';
+          units.forEach(function(u) {
+            var opt = document.createElement('option');
+            opt.value = u;
+            opt.textContent = u;
+            sel.appendChild(opt);
+          });
+          sel.value = units.includes(prev) ? prev : units[0];
+        });
+      });
+    };
+  }
+})();
+
+// Remove '+ Add/Edit Units' from all unit dropdowns after page load
+function removeAddEditOptionFromDropdowns() {
+  document.querySelectorAll('.unit-select').forEach(function(sel) {
+    Array.from(sel.options).forEach(function(opt) {
+      if (opt.value === '__add__') sel.removeChild(opt);
+    });
+  });
+}
+// Call after rendering item manager
+setTimeout(removeAddEditOptionFromDropdowns, 500);
+
+// --- Customer Orders Modal Logic ---
+(function(){
+  // Find the button by its text content (case-insensitive)
+  var btns = Array.from(document.querySelectorAll('button'));
+  var btn = btns.find(b => b.textContent && b.textContent.trim().toLowerCase() === 'customer orders');
+  if(!btn) return;
+  var modal = document.getElementById('customerOrdersModal');
+  var content = document.getElementById('customerOrdersContent');
+  var closeBtn = document.getElementById('closeCustomerOrdersBtn');
+  btn.style.cursor = 'pointer';
+  btn.tabIndex = 0;
+  btn.onclick = function(e) {
+    e.preventDefault();
+    renderCustomerOrders();
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+  closeBtn.onclick = function() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+  modal.onclick = function(e) { if (e.target === modal) closeBtn.onclick(); };
+  function renderCustomerOrders() {
+    let orders = [];
+    try { orders = JSON.parse(localStorage.getItem('customer_orders')||'[]'); } catch(e){ orders = []; }
+    let items = [];
+    try { items = JSON.parse(localStorage.getItem('grocery_items_v1')||'[]'); } catch(e){ items = []; }
+    if(!orders.length){ content.innerHTML = '<div style="color:#888;margin:24px 0;">No customer orders found.</div>'; return; }
+    // Group by customer (name+phone)
+    let grouped = {};
+    orders.forEach(order => {
+      let key = (order.customerName||'')+'_'+(order.customerPhone||'');
+      if(!grouped[key]) grouped[key] = {customer: order, orders: []};
+      grouped[key].orders.push(order);
+    });
+    let html = '';
+    Object.values(grouped).forEach(group => {
+      let c = group.customer;
+      html += `<div style='border:1.5px solid #e0e0e0;border-radius:10px;padding:18px 18px 10px 18px;margin-bottom:22px;background:#fafbfc;'>`;
+      html += `<div style='font-size:1.13em;font-weight:600;color:#234;margin-bottom:6px;'>${c.customerName||'Unknown'} <span style='color:#888;font-size:0.98em;'>(${c.customerPhone||''})</span></div>`;
+      html += `<div style='color:#555;font-size:0.98em;margin-bottom:8px;'>Address: ${c.address||''}</div>`;
+      html += `<div style='color:#888;font-size:0.97em;margin-bottom:8px;'>Month: ${c.month||''} | Date: ${c._date||''}</div>`;
+      group.orders.forEach((order, idx) => {
+        html += `<div style='margin:10px 0 10px 0;padding:12px 12px 8px 12px;background:#fff;border-radius:8px;border:1px solid #e0e0e0;'>`;
+        html += `<div style='font-weight:600;color:#1976d2;margin-bottom:6px;'>Order #${idx+1}</div>`;
+        // Items
+        let hasAny = false;
+        items.forEach(item => {
+          if(item.subitems && item.subitems.length>0){
+            item.subitems.forEach(subitem => {
+              const field = makeFieldName(item.text+'_'+subitem.text);
+              const unitField = makeFieldName(item.text+'_'+subitem.text+'_unit');
+              const qty = order[field];
+              const unit = order[unitField]||'';
+              const w = parseFloat(subitem.wholesalePrice)||0;
+              const cP = parseFloat(subitem.customerPrice)||0;
+              if(qty && qty.trim()!==''){
+                hasAny = true;
+                html += `<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;'><span>${item.text} - ${subitem.text}</span><span>${qty} <span style='color:#888;'>${unit}</span></span></div>`;
+                html += `<div style='font-size:0.98em;color:#444;margin-bottom:4px;'>Wholesale: ₹${w.toFixed(2)} | Customer: ₹${cP.toFixed(2)}</div>`;
+              }
+            });
+          }else{
+            const field = makeFieldName(item.text);
+            const unitField = makeFieldName(item.text+'_unit');
+            const qty = order[field];
+            const unit = order[unitField]||'';
+            const w = parseFloat(item.wholesalePrice)||0;
+            const cP = parseFloat(item.customerPrice)||0;
+            if(qty && qty.trim()!==''){
+              hasAny = true;
+              html += `<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;'><span>${item.text}</span><span>${qty} <span style='color:#888;'>${unit}</span></span></div>`;
+              html += `<div style='font-size:0.98em;color:#444;margin-bottom:4px;'>Wholesale: ₹${w.toFixed(2)} | Customer: ₹${cP.toFixed(2)}</div>`;
+            }
+          }
+        });
+        if(!hasAny) html += `<div style='color:#aaa;margin-bottom:4px;'>No items in this order.</div>`;
+        // Totals
+        const totalW = parseFloat(order.total)||0;
+        const totalC = totalW + (parseFloat(order.profit)||0);
+        html += `<div style='margin-top:8px;font-size:1.05em;'><b>Total Wholesale:</b> ₹${totalW.toFixed(2)} &nbsp; <b>Total Customer:</b> ₹${totalC.toFixed(2)} &nbsp; <b>Profit:</b> <span style='color:#2e7d32;'>₹${(totalC-totalW).toFixed(2)}</span></div>`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+    });
+    content.innerHTML = html;
+  }
+  function makeFieldName(label) {
+    return label.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
+  }
+})();
+    </script>
+</body>
+</html>
